@@ -1,6 +1,5 @@
 # TC1030.304_A01713780_ODISEA_ESPACIAL
 # Odisea Espacial
-# Space Survivor 🚀
 
 ## Descripción del proyecto
 
