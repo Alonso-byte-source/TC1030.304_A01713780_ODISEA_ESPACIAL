@@ -53,3 +53,15 @@ El juego funciona mediante un **game loop** que:
 - Enemigos con distintos comportamientos
 - Generación dinámica de obstáculos
 - HUD con vidas y score
+
+---
+
+## Controles
+La nave se mueve con las flechas del teclado, disparas con la letra a
+Destruir asteroides te da 5 puntos, si acumulas 5 puntos aparece un enemigo (aún no ataca)
+
+---
+
+## Ejecución
+
+Ejecutar en consola externa 
