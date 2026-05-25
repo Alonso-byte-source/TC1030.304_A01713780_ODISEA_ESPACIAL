@@ -40,5 +40,4 @@ void AST::choque(class NAVE &N){
     }
 }
 
-
 #endif
