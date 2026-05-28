@@ -21,22 +21,22 @@ class NAVE : public ENTIDAD{
     public:
         NAVE(int, int, int, int);
         void mover();
-        int vid();
-        void COR();
+        int getVida();
+        void recibirDanio();
         void pintar();
         void borrar();
         void pintar_corazones();
         void morir();
 };
 
-NAVE::NAVE(int _x, int _y, int _corazones, int _vida)
-    : ENTIDAD(_x, _y), corazones(_corazones), vida(_vida){}
+NAVE::NAVE(int x1, int y1, int corazones1, int vida1)
+    : ENTIDAD(x1, y1), corazones(corazones1), vida(vida1){}
 
-int NAVE::vid(){
+int NAVE::getVida(){
     return vida;
 }
 
-void NAVE::COR(){
+void NAVE::recibirDanio(){
     corazones--;
 }
 

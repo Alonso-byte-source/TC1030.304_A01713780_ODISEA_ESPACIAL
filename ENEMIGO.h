@@ -16,15 +16,15 @@ class ENEMIGO : public ENTIDAD{
         void mover(class NAVE &N);
         void pintar();
         void borrar();
-        void cor();
-        int vid();
+        void recibirDanio();
+        int getVida();
         bool puedeDisparar();
         void morir();
         bool estaVivo();
 };
 
-ENEMIGO::ENEMIGO(int _x, int _y, int _vida, bool _vivo) 
-    : ENTIDAD(_x, _y), vida(_vida), vivo(_vivo) {
+ENEMIGO::ENEMIGO(int x1, int y1, int vida1, bool vivo1) 
+    : ENTIDAD(x1, y1), vida(vida1), vivo(vivo1) {
         cooldown = 0;
         disparando = false;
     }
@@ -64,11 +64,11 @@ void ENEMIGO::mover(class NAVE &N){
     pintar();
 }
 
-void ENEMIGO::cor(){
+void ENEMIGO::recibirDanio(){
     vida--;
 }
 
-int ENEMIGO::vid(){
+int ENEMIGO::getVida(){
     return vida;
 }
 
