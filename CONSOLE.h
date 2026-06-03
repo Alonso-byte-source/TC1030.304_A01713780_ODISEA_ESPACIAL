@@ -8,6 +8,13 @@
 #include <Windows.h>
 #include <conio.h>
 
+class CONSOLE{
+    public:
+        static void gotoxy();
+        static void OcultarCursor();
+        static void pintarLimites();
+};
+
 static void gotoxy(int x, int y){
     HANDLE hCon;
     hCon = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -39,6 +46,16 @@ static void SleepMs(int ms){
 #include <unistd.h>
 #include <termios.h>
 #include <fcnt1.h>
+
+class CONSOLE{
+    public:
+        static void gotoxy();
+        static void OcultarCursor();
+        static void pintarLimites();
+        static int getch();
+        static void SleepMs(int);
+        static int kbhit();
+};
 
 static void gotoxy(int x, int y){
     printf("\033[%d;%dH", y, x);
@@ -103,11 +120,11 @@ static int kbhit(){
 static void pintarLimites(){
 
     for(int i = 2; i < 78; i++){
-        gotoxy(i, 3); printf("-");
-        gotoxy(i, 25); printf("-");
+        gotoxy(i, 3); printf("_");
+        gotoxy(i, 25); printf("_");
     }
 
-    for(int i = 4; i < 25; i++){
+    for(int i = 4; i < 26; i++){
         gotoxy(2, i); printf("|");
         gotoxy(77, i); printf("|");
     }

@@ -77,7 +77,7 @@ void ENEMIGO::morir(){
     borrar();
     gotoxy(x, y);   printf("* ** *");
     gotoxy(x, y+1); printf("* ** *");
-    Sleep(200);
+    SleepMs(200);
 
     borrar();
     vivo = false;

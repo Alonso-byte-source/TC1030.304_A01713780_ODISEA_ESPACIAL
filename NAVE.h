@@ -14,6 +14,7 @@
 class NAVE : public ENTIDAD{
     private:
         int corazones, vida;
+        char boton;
     public: 
         NAVE(int, int, int, int);
         void recibirDanio();
@@ -23,24 +24,26 @@ class NAVE : public ENTIDAD{
         void pintarSalud();
         void morir();
         int getVida();
+        void setTecla(char);
 };
 
-NAVE::NAVE(int x1, int y1, int corazones1, int vida1): ENTIDAD(x1, y1), corazones(corazones1), vida(vida1) {}
+NAVE::NAVE(int x1, int y1, int corazones1, int vida1): ENTIDAD(x1, y1), corazones(corazones1), vida(vida1), boton(' ') {}
 
 void NAVE::recibirDanio(){
     corazones --;
 }
 
+void NAVE::setTecla(char tecla){
+    boton = tecla;
+}
+
 void NAVE::mover(){
-    if(kbhit()){
-        char tecla = getch();
-        borrar();
-        if(tecla == 'a' && x > 3) x--;
-        if(tecla == 'd' && x+6 < 77) x++;
-        if(tecla == 'w' && y > 4) y--;
-        if(tecla == 's' && y+3 < 25) y++;
-        pintar();
-    }
+    borrar();
+    if(boton == 'a' && x > 3) x--;
+    if(boton == 'd' && x+6 < 77) x++;
+    if(boton == 'w' && y > 4) y--;
+    if(boton == 's' && y+3 < 25) y++;
+    pintar();
 }
 
 void NAVE::pintar(){

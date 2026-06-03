@@ -52,16 +52,17 @@ void JUEGO::iniciar(){
         Input();
         Update();
         Render();
-        Sleep(30);
+        SleepMs(30);
     }
 }
 
 void JUEGO::Input(){
     if(!kbhit()) return;
     char tecla = getch();
-        if(tecla == 'l'){
+    if(tecla == ' '){
         B.push_back(new BALA(N.getX() + 2, N.getY() - 1, -1));
     }
+    N.setTecla(tecla);
     N.mover();
 }
 
