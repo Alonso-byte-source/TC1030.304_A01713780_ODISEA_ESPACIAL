@@ -13,8 +13,8 @@ class ENEMIGO : public ENTIDAD{
     public:
         ENEMIGO(int, int, int, bool);
         void mover() override;
-        void pintar();
-        void borrar();
+        void pintar() override;
+        void borrar() override;
         void recibirDanio();
         bool puedeDisparar();
         void morir();
@@ -51,8 +51,8 @@ void ENEMIGO::mover(){
 }
 
 void ENEMIGO::pintar(){
-    gotoxy(x, y);   printf(" %c%c%c ", 170, 219, 169);
-    gotoxy(x, y+1); printf("  %c  ", 209);
+    gotoxy(x, y);   printf(" <O>");
+    gotoxy(x, y+1); printf("  V");
 }
 
 void ENEMIGO::borrar(){

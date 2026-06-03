@@ -7,6 +7,8 @@ class ENTIDAD{
     public:
         ENTIDAD(int, int);
         virtual void mover() = 0;
+        virtual void pintar() = 0;
+        virtual void borrar() = 0;
         int getX();
         int getY();
 };

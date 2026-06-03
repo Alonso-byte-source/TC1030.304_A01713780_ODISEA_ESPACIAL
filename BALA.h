@@ -9,14 +9,24 @@ class BALA : public ENTIDAD{
         int direccion;
     public:
         BALA(int, int, int);
-        void mover();
+        void mover() override;
+        void pintar() override;
+        void borrar() override;
         bool fuera();
 };
 
 BALA::BALA(int x1, int y1, int direccion1): ENTIDAD(x1, y1), direccion(direccion1) {} 
 
-void BALA::mover(){
+void BALA::pintar(){
+    gotoxy(x, y); printf("*");
+}
+
+void BALA::borrar(){
     gotoxy(x, y); printf(" ");
+}
+
+void BALA::mover(){
+    borrar();
     if(direccion < 0){
         y--;
     }
@@ -24,11 +34,10 @@ void BALA::mover(){
     {
         y++;
     }
-    gotoxy(x, y); printf("%c", 249);
+    pintar();
 }
 
 bool BALA::fuera(){
-
     if(direccion < 0 && y <= 4)
         return true;
 

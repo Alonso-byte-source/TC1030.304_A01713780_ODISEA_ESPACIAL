@@ -18,9 +18,9 @@ class NAVE : public ENTIDAD{
     public: 
         NAVE(int, int, int, int);
         void recibirDanio();
-        void pintar();
+        void pintar() override;
         void mover() override;
-        void borrar();
+        void borrar() override;
         void pintarSalud();
         void morir();
         int getVida();
@@ -47,9 +47,9 @@ void NAVE::mover(){
 }
 
 void NAVE::pintar(){
-    gotoxy(x, y);   printf("  %c", 94);
-    gotoxy(x, y+1); printf(" %c%c%c",60, 207, 62);
-    gotoxy(x, y+2); printf("%c%c %c%c", 65, 193, 193, 65);
+    gotoxy(x, y);   printf("  ^");
+    gotoxy(x, y+1); printf(" <0>");
+    gotoxy(x, y+2); printf("A^ ^A");
 }
 
 void NAVE::borrar(){

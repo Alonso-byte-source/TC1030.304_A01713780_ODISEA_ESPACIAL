@@ -8,19 +8,25 @@
 class ASTEROIDE : public ENTIDAD{
     public:
         ASTEROIDE(int, int);
-        void pintar();
-        void mover();
+        void pintar() override;
+        void mover() override;
+        void borrar() override;
         void choque(NAVE&);
 };
 
 ASTEROIDE::ASTEROIDE(int x1, int y1): ENTIDAD(x1, y1) {}
 
 void ASTEROIDE::pintar(){
-    gotoxy(x, y); printf("%c", 233);
+    gotoxy(x, y); printf("O");
 }
 
-void ASTEROIDE::mover(){
+void ASTEROIDE::borrar(){
     gotoxy(x, y); printf(" ");
+}
+
+
+void ASTEROIDE::mover(){
+    borrar();
     y++;
     if(y > 24){
         x = rand() % 71 + 4;

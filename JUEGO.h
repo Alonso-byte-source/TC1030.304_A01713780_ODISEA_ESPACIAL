@@ -23,9 +23,6 @@ class JUEGO{
         list<BALA*> BE;
         int puntos;
         bool gameOver;
-    public:
-        JUEGO();
-        void iniciar();
         void Input();
         void Update();
         void Render();
@@ -33,6 +30,9 @@ class JUEGO{
         void actualizarBalasEnemigo(); 
         void actualizarAsteroides();
         void colisiones();
+    public:
+        JUEGO();
+        void iniciar();
 };
 
 JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 3, 1), puntos(0), gameOver(false){
