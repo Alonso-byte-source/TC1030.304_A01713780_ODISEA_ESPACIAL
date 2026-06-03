@@ -7,161 +7,213 @@
 
 #include "ENTIDAD.h"
 #include "NAVE.h"
-#include "AST.h"
-#include "BALA.h"
-#include "CONSOLE.h"
-
 #include "ENEMIGO.h"
-
+#include "BALA.h"
+#include "ASTEROIDE.h"
+#include "CONSOLE.h"
 
 using namespace std;
 
-class JUEGO{
+class JUEGO{ 
     private:
-       NAVE N;
-       ENEMIGO E;
-       list<AST*> A; 
-       list<BALA*> B;
-       list<BALA*> BE;
-       int puntos;
-       bool gameOver;
+        NAVE N;
+        ENEMIGO E;
+        list<ASTEROIDE*> A; 
+        list<BALA*> B;
+        list<BALA*> BE;
+        int puntos;
+        bool gameOver;
     public:
         JUEGO();
         void iniciar();
+        void Input();
+        void Update();
+        void Render();
+        void actualizarBalasJugador();
+        void actualizarBalasEnemigo(); 
+        void actualizarAsteroides();
+        void colisiones();
 };
 
-JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 3, 1), puntos(0), gameOver(false){}
+JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 3, 1), puntos(0), gameOver(false){
+    E.setObjetivo(&N);
+}
 
 void JUEGO::iniciar(){
     OcultarCursor();
-    pintar_limites();
+    pintarLimites();
     N.pintar();
-    N.pintar_corazones();
 
-    list<AST*>::iterator itA;
     for(int i=0; i<4; i++){
-        A.push_back(new AST(rand()%75 +3, rand()%5 + 4));
+        A.push_back(new ASTEROIDE(rand()%75 +3, rand()%5 + 4));
     }
-
-    list<BALA*>::iterator it;
-    list<BALA*>::iterator ite;
 
     while(!gameOver){
-        gotoxy(4, 2); printf("Puntos %d", puntos);
-        if(kbhit()){
-            char tecla = getch();
-            if(tecla == 'a')
-            B.push_back(new BALA(N.X() + 2, N.Y() - 1, -1, JUGADOR));
-        }
-
-        for(it = B.begin(); it != B.end(); it++){
-            (*it)->mover();
-            if((*it)->fuera()){
-                gotoxy((*it)->X(), (*it)->Y()); printf(" ");
-                delete(*it);
-                it = B.erase(it);
-            }
-        }
-
-        for(itA = A.begin(); itA != A.end(); itA++){
-            (*itA)->mover();
-            (*itA)->choque(N);
-        }
-
-        for(itA = A.begin(); itA != A.end(); itA++){
-            for(it = B.begin(); it != B.end(); it++){
-                if((*itA)->X() == (*it)->X() && ((*itA)->Y()+1 == (*it)->Y() || (*itA)->Y() == (*it)->Y() )){
-                    gotoxy((*it)->X(), (*it)->Y()); printf(" ");
-                    delete(*it);
-                    it = B.erase(it);
-
-                    A.push_back(new AST(rand()%75 + 3, 4));
-                    gotoxy((*itA)->X(), (*itA)->Y()); printf(" ");
-                    delete(*itA);
-                    itA = A.erase(itA);
-                    puntos += 5;
-                }
-            }
-        }
-        if(puntos >= 5 && E.estaVivo()){
-
-            E.mover(N);
-            E.pintar();
-
-            for(it = B.begin(); it != B.end(); ){
-
-                if(
-                    (*it)->X() >= E.X() &&
-                    (*it)->X() <= E.X()+4 &&
-
-                    (*it)->Y() >= E.Y() &&
-                    (*it)->Y() <= E.Y()+1
-                ){
-
-                    E.recibirDanio();
-
-                    gotoxy((*it)->X(), (*it)->Y());
-                    printf(" ");
-
-                    delete(*it);
-
-                    it = B.erase(it);
-
-                    if(E.getVida() <= 0){
-                        E.morir();
-                        puntos += 20;
-                    }
-                }
-                else{
-                    it++;
-                }
-            }
-
-            if(E.puedeDisparar()){
-                BE.push_back(
-                    new BALA(
-                        E.X()+1,
-                        E.Y()+2,
-                        1,
-                        VILLANO
-                    )
-                );
-            }
-
-            for(ite = BE.begin(); ite != BE.end(); ){
-                (*ite)->mover();
-                bool borrar = false;
-                if((*ite)->fuera()){
-                    borrar = true;
-                }
-                else if(
-                    (*ite)->X() >= N.X() &&
-                    (*ite)->X() <= N.X()+5 &&
-
-                    (*ite)->Y() >= N.Y() &&
-                    (*ite)->Y() <= N.Y()+2
-                ){
-                    N.recibirDanio();
-                    N.pintar_corazones();
-                    borrar = true;
-                }
-
-                if(borrar){
-                    gotoxy((*ite)->X(), (*ite)->Y());
-                    printf(" ");
-                    delete(*ite);
-                    ite = BE.erase(ite);
-                }
-                else{
-                    ite++;
-                }
-            }
-        }
-        if(N.getVida() == 0) gameOver = TRUE;
-        N.morir();
-        N.mover();
+        Input();
+        Update();
+        Render();
         Sleep(30);
     }
-} 
+}
+
+void JUEGO::Input(){
+    if(!kbhit()) return;
+    char tecla = getch();
+        if(tecla == 'l'){
+        B.push_back(new BALA(N.getX() + 2, N.getY() - 1, -1));
+    }
+    N.mover();
+}
+
+void JUEGO::Update(){
+    actualizarBalasJugador();
+    actualizarBalasEnemigo();
+    actualizarAsteroides();
+    colisiones();
+
+    if(puntos >= 5 && E.estaVivo()){
+        E.mover();
+        if(E.puedeDisparar()){
+            BE.push_back(new BALA(E.getX()+1, E.getY()+2, 1));
+        }
+        actualizarBalasEnemigo();
+    }
+
+    N.morir();
+    if(N.getVida() <= 0){
+        gameOver = true;
+    }
+}
+
+void JUEGO::Render(){
+    gotoxy(4, 2); printf("Puntos %d ", puntos);
+    N.pintar();
+    N.pintarSalud();
+    if(puntos >= 5 && E.estaVivo()){
+        E.pintar();
+    }
+    for(auto a : A) a->pintar();
+}
+
+
+void JUEGO::actualizarAsteroides(){
+
+    for(auto it = A.begin(); it != A.end(); ){
+        (*it)->mover();
+        (*it)->choque(N);
+
+        if(false){ 
+            delete *it;
+            it = A.erase(it);   } else {
+            it++;
+        }
+    }
+}
+
+void JUEGO::actualizarBalasJugador(){
+
+    for(auto it = B.begin(); it != B.end(); ){
+
+        (*it)->mover();
+
+        if((*it)->fuera()){
+            gotoxy((*it)->getX(), (*it)->getY()); printf(" ");
+            delete *it;
+            it = B.erase(it);
+        }
+        else{
+            it++;
+        }
+    }
+}
+
+void JUEGO::actualizarBalasEnemigo(){
+
+    for(auto it = BE.begin(); it != BE.end(); ){
+
+        (*it)->mover();
+
+        bool borrar = false;
+
+        if((*it)->fuera()){
+            gotoxy((*it)->getX(), (*it)->getY()); printf(" ");
+            borrar = true;
+        }
+        else if((*it)->getX() >= N.getX() &&
+                (*it)->getX() <= N.getX()+5 &&
+                (*it)->getY() >= N.getY() &&
+                (*it)->getY() <= N.getY()+2){
+            N.recibirDanio();
+            borrar = true;
+        }
+
+        if(borrar){
+            delete *it;
+            it = BE.erase(it);
+        } else{
+            it++;
+        }
+    }
+}
+
+void JUEGO::colisiones(){
+
+    for(auto itA = A.begin(); itA != A.end(); ){
+
+        bool eliminado = false;
+
+        for(auto itB = B.begin(); itB != B.end(); ){
+
+            if((*itA)->getX() == (*itB)->getX() && ((*itA)->getY() == (*itB)->getY() || (*itA)->getY()+1 == (*itB)->getY())){
+                gotoxy((*itB)->getX(), (*itB)->getY()); printf(" ");
+                delete *itB;
+                itB = B.erase(itB);
+
+                A.push_back(new ASTEROIDE(rand()%75 + 3, 4));
+                gotoxy((*itA)->getX(), (*itA)->getY()); printf(" ");
+                delete *itA;
+                itA = A.erase(itA);
+
+                puntos += 5;
+                eliminado = true;
+                break;
+            } 
+            else{
+                itB++;
+            }
+        }
+
+        if(!eliminado){
+            itA++;
+        }
+    }
+
+    if(puntos >= 5 && E.estaVivo()){
+
+        for(auto it = B.begin(); it != B.end(); ){
+
+            if(
+                (*it)->getX() >= E.getX() &&
+                (*it)->getX() <= E.getX()+4 &&
+                (*it)->getY() >= E.getY() &&
+                (*it)->getY() <= E.getY()+1
+            ){
+
+                E.recibirDanio();
+
+                delete *it;
+                it = B.erase(it);
+
+                if(E.getVida() <= 0){
+                    E.morir();
+                    puntos += 20;
+                }
+            }
+            else{
+                it++;
+            }
+        }
+    }
+}
 
 #endif

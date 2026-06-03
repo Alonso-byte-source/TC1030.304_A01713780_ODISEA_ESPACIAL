@@ -1,91 +1,82 @@
 #ifndef ENEMIGO_H
 #define ENEMIGO_H
 
-#include <unistd.h>
-
 #include "ENTIDAD.h"
+#include "CONSOLE.h"
 #include "NAVE.h"
 
 class ENEMIGO : public ENTIDAD{
-    private: 
-        int vida;
+    private:
+        int vida,cooldown;
         bool disparando, vivo;
-        int cooldown;
+        NAVE* objetivo;
     public:
         ENEMIGO(int, int, int, bool);
-        void mover(class NAVE &N);
+        void mover() override;
         void pintar();
         void borrar();
         void recibirDanio();
-        int getVida();
         bool puedeDisparar();
         void morir();
         bool estaVivo();
+        int getVida();
+        void setObjetivo(NAVE* n);
 };
 
-ENEMIGO::ENEMIGO(int x1, int y1, int vida1, bool vivo1) 
-    : ENTIDAD(x1, y1), vida(vida1), vivo(vivo1) {
-        cooldown = 0;
-        disparando = false;
-    }
+ENEMIGO::ENEMIGO(int x1, int y1, int vida1, bool vivo1)
+    : ENTIDAD(x1, y1), vida(vida1), vivo(vivo1), objetivo(nullptr), cooldown(0), disparando(false){}
 
-void ENEMIGO::pintar(){
-    gotoxy(x, y); printf(" %c%c%c ", 170, 219, 169);
-    gotoxy(x, y+1); printf("  %c  ", 209);
-}
-
-void ENEMIGO::borrar(){
-    gotoxy(x, y); printf("        ");
-    gotoxy(x, y+1); printf("        ");
-}
-
-void ENEMIGO::mover(class NAVE &N){
+void ENEMIGO::mover(){
+    if(!objetivo) return;
     borrar();
     if(disparando){
-
         cooldown++;
-
         if(cooldown >= 30){
             disparando = false;
             cooldown = 0;
         }
     }
     else{
-        if(x < N.X()){
+        if(x < objetivo->getX()){
             x++;
         }
-        else if(x > N.X()){
+        else if(x > objetivo->getX()){
             x--;
         }
-        if(abs(x - N.X()) <= 1){
+        if(abs(x - objetivo->getX()) <= 1){
             disparando = true;
         }
     }
     pintar();
 }
 
+void ENEMIGO::pintar(){
+    gotoxy(x, y);   printf(" %c%c%c ", 170, 219, 169);
+    gotoxy(x, y+1); printf("  %c  ", 209);
+}
+
+void ENEMIGO::borrar(){
+    gotoxy(x, y);   printf("        ");
+    gotoxy(x, y+1); printf("        ");
+}
+
 void ENEMIGO::recibirDanio(){
     vida--;
 }
 
-int ENEMIGO::getVida(){
-    return vida;
-}
-
 bool ENEMIGO::puedeDisparar(){
-    return disparando && cooldown == 1;
+    return cooldown == 1 && disparando;
 }
 
 void ENEMIGO::morir(){
+    borrar();
+    gotoxy(x, y);   printf("***");
+    gotoxy(x, y+1); printf("***");
+    Sleep(200);
 
     borrar();
-
-    gotoxy(x, y);
-    printf("***");
-
-    gotoxy(x, y+1);
-    printf("***");
-
+    gotoxy(x, y);   printf("* ** *");
+    gotoxy(x, y+1); printf("* ** *");
     Sleep(200);
 
     borrar();
@@ -94,6 +85,14 @@ void ENEMIGO::morir(){
 
 bool ENEMIGO::estaVivo(){
     return vivo;
+}
+
+int ENEMIGO::getVida(){
+    return vida;
+}
+
+void ENEMIGO::setObjetivo(NAVE* n){
+    objetivo = n;
 }
 
 #endif

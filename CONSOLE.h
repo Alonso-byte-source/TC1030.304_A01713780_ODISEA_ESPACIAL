@@ -1,19 +1,17 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include<stdio.h>
-#include<Windows.h>
+#include <stdio.h>
 
-class CONSOLE{
-    public:
-        static void gotoxy();
-        static void OcultarCursor();
-        static void pintar_limites();
-};
+#ifdef _WIN32
+
+#include <Windows.h>
+#include <conio.h>
 
 static void gotoxy(int x, int y){
     HANDLE hCon;
     hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+
     COORD dwPos;
     dwPos.X = x;
     dwPos.Y = y;
@@ -24,26 +22,96 @@ static void gotoxy(int x, int y){
 static void OcultarCursor(){
     HANDLE hCon;
     hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO cci;
+
+    _CONSOLE_CURSOR_INFO cci;
     cci.dwSize = 2;
     cci.bVisible = FALSE;
 
     SetConsoleCursorInfo(hCon, &cci);
 }
 
-static void pintar_limites(){
+static void SleepMs(int ms){
+    Sleep(ms);
+}
+
+
+#else
+#include <unistd.h>
+#include <termios.h>
+#include <fcnt1.h>
+
+static void gotoxy(int x, int y){
+    printf("\033[%d;%dH", y, x);
+}
+
+static void OcultarCursor(){
+    printf("\033[?25l");
+}
+
+static void SleepMS(int ms){
+    usleep(ms * 1000);
+}
+
+static int getch(){
+    struct termios oldt, newt;
+    int ch;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    ch = getchar();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
+    return ch;
+}
+
+static int kbhit(){
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+    ch = getchar();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+    if(ch != EOF){
+        ungetc(ch, stdin);
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+static void pintarLimites(){
+
     for(int i = 2; i < 78; i++){
-        gotoxy(i, 3); printf("%c", 205);
-        gotoxy(i, 25); printf("%c", 205);
+        gotoxy(i, 3); printf("-");
+        gotoxy(i, 25); printf("-");
     }
+
     for(int i = 4; i < 25; i++){
-        gotoxy(2, i); printf("%c", 186);
-        gotoxy(77, i); printf("%c", 186);
+        gotoxy(2, i); printf("|");
+        gotoxy(77, i); printf("|");
     }
-    gotoxy(2, 3); printf("%c", 201);
-    gotoxy(2, 25); printf("%c", 200);
-    gotoxy(77, 3); printf("%c", 187);
-    gotoxy(77, 25); printf("%c", 188);
 }
 
 #endif
+
