@@ -61,11 +61,11 @@ El juego funciona mediante un **game loop** que:
 ## Controles
 | Botón | Acción |
 |---|---|
-| # a | Desplaza la nave hacia la izquierda |
-| # d | Desplaza la nave hacia la derecha |
-| # s | Desplaza la nave hacia abajo |
-| # w | Desplaza la nave hacia arriba |
-| # barra espaciadora | Dipara los proyectiles | 
+| <center>**a**<\center> | Desplaza la nave hacia la izquierda |
+| <center>**d**<\center> | Desplaza la nave hacia la derecha |
+| <center>**s**<\center> | Desplaza la nave hacia abajo |
+| <center>**w**<\center> | Desplaza la nave hacia arriba |
+| <center>**barra espaciadora**<\center> | Dipara los proyectiles | 
 
 ---
 
