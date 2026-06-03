@@ -21,6 +21,7 @@ class JUEGO{
         list<ASTEROIDE*> A; 
         list<BALA*> B;
         list<BALA*> BE;
+        list<ENTIDAD*> entidades;
         int puntos;
         bool gameOver;
         void Input();
@@ -32,11 +33,29 @@ class JUEGO{
         void colisiones();
     public:
         JUEGO();
+        ~JUEGO();
         void iniciar();
 };
 
 JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 3, 1), puntos(0), gameOver(false){
     E.setObjetivo(&N);
+    entidades.push_back(&N);
+    entidades.push_back(&E);
+}
+
+JUEGO::~JUEGO(){
+    for(auto a : A){
+        delete a;
+    }
+    for(auto b : B){
+        delete b;
+    }
+    for(auto be : BE){
+        delete be;
+    }
+    A.clear();
+    B.clear();
+    BE.clear();
 }
 
 void JUEGO::iniciar(){
@@ -87,13 +106,27 @@ void JUEGO::Update(){
 }
 
 void JUEGO::Render(){
-    gotoxy(4, 2); printf("Puntos %d ", puntos);
-    N.pintar();
-    N.pintarSalud();
-    if(puntos >= 5 && E.estaVivo()){
-        E.pintar();
+
+    gotoxy(4,2);
+    printf("Puntos %d ", puntos);
+
+    for(auto e : entidades){
+
+        if(e == &E){
+            if(puntos >= 5 && E.estaVivo())
+                e->pintar();
+        }
+        else{
+            e->pintar();
+        }
     }
-    for(auto a : A) a->pintar();
+
+    N.pintarSalud();
+
+    for(auto a : A){
+        ENTIDAD* e = a;
+        e->pintar();
+    }
 }
 
 
@@ -190,18 +223,9 @@ void JUEGO::colisiones(){
     }
 
     if(puntos >= 5 && E.estaVivo()){
-
         for(auto it = B.begin(); it != B.end(); ){
-
-            if(
-                (*it)->getX() >= E.getX() &&
-                (*it)->getX() <= E.getX()+4 &&
-                (*it)->getY() >= E.getY() &&
-                (*it)->getY() <= E.getY()+1
-            ){
-
+            if((*it)->getX() >= E.getX() && (*it)->getX() <= E.getX()+4 && (*it)->getY() >= E.getY() && (*it)->getY() <= E.getY()+1){
                 E.recibirDanio();
-
                 delete *it;
                 it = B.erase(it);
 

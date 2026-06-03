@@ -6,11 +6,12 @@ class ENTIDAD{
         int x, y;
     public:
         ENTIDAD(int, int);
+        int getX();
+        int getY();
         virtual void mover() = 0;
         virtual void pintar() = 0;
         virtual void borrar() = 0;
-        int getX();
-        int getY();
+        virtual ~ENTIDAD() = default;
 };
 
 ENTIDAD::ENTIDAD(int x1, int y1): x(x1), y(y1) {}

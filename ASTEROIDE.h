@@ -9,8 +9,8 @@ class ASTEROIDE : public ENTIDAD{
     public:
         ASTEROIDE(int, int);
         void pintar() override;
-        void mover() override;
         void borrar() override;
+        void mover() override;
         void choque(NAVE&);
 };
 
