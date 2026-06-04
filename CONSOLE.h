@@ -1,3 +1,11 @@
+/**
+ * La clase CONSOLE proporciona FUNCIONES para manipular la consola.
+ *
+ * Contiene funciones para posicionar el cursor, ocultarlo,
+ * dibujar los límites del área de juego, detectar entradas
+ * del teclado y controlar pausas en la ejecución del programa.
+ */
+
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
@@ -15,6 +23,19 @@ class CONSOLE{
         static void pintarLimites();
 };
 
+
+/**
+ * gotoxy posiciona el cursor en una coordenada específica.
+ *
+ * Mueve el cursor de la consola a la posición indicada por
+ * las coordenadas x e y para permitir la impresión de texto
+ * en una ubicación determinada.
+ *
+ * @param x coordenada horizontal.
+ * @param y coordenada vertical.
+ * @return
+ */
+
 static void gotoxy(int x, int y){
     HANDLE hCon;
     hCon = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -26,6 +47,16 @@ static void gotoxy(int x, int y){
     SetConsoleCursorPosition(hCon, dwPos);
 }
 
+/**
+ * OcultarCursor oculta el cursor de la consola.
+ *
+ * Desactiva la visualización del cursor para mejorar la
+ * apariencia gráfica durante la ejecución del juego.
+ *
+ * @param
+ * @return
+ */
+
 static void OcultarCursor(){
     HANDLE hCon;
     hCon = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -36,6 +67,18 @@ static void OcultarCursor(){
 
     SetConsoleCursorInfo(hCon, &cci);
 }
+
+/**
+ * SleepMs pausa temporalmente la ejecución del programa.
+ *
+ * Detiene la ejecución durante la cantidad de milisegundos
+ * especificada para controlar la velocidad de actualización
+ * del juego.
+ *
+ * @param ms tiempo de espera en milisegundos.
+ * @return
+ */
+
 
 static void SleepMs(int ms){
     Sleep(ms);
@@ -69,6 +112,17 @@ static void SleepMS(int ms){
     usleep(ms * 1000);
 }
 
+
+/**
+ * getch obtiene una tecla presionada por el usuario.
+ *
+ * Lee una tecla desde el teclado sin necesidad de que
+ * el usuario presione Enter.
+ *
+ * @param
+ * @return código ASCII de la tecla capturada.
+ */
+
 static int getch(){
     struct termios oldt, newt;
     int ch;
@@ -86,6 +140,16 @@ static int getch(){
 
     return ch;
 }
+
+/**
+ * kbhit verifica si existe una tecla disponible.
+ *
+ * Comprueba si el usuario ha presionado alguna tecla
+ * sin detener la ejecución normal del programa.
+ *
+ * @param
+ * @return 1 si existe una tecla disponible, 0 en caso contrario.
+ */
 
 static int kbhit(){
     struct termios oldt, newt;
@@ -117,6 +181,15 @@ static int kbhit(){
 }
 #endif
 
+/**
+ * pintarLimites dibuja el área de juego.
+ *
+ * Imprime los bordes superior, inferior y laterales que
+ * delimitan la zona donde se desarrollará la partida.
+ *
+ * @param
+ * @return
+ */
 static void pintarLimites(){
 
     for(int i = 2; i < 78; i++){
