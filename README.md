@@ -52,8 +52,6 @@ El juego funciona mediante un **game loop** que:
 - Sistema de disparos
 - Colisiones
 - Sistema de puntuación
-- Enemigos con distintos comportamientos
-- Generación dinámica de obstáculos
 - HUD con vidas y score
 
 ---
