@@ -44,6 +44,7 @@ class JUEGO{
         list<BALA*> B; // Lista con punteros a objetos BALA (para el jugador)
         list<BALA*> BE; // Lista con punteros a objetos ASTEROIDE (para el enemigo)
         list<ENTIDAD*> entidades; // Lista con punteros a objetos de la clase abstracta ENTIDAD
+        void limpiarPantalla();
         void Input();
         void Update();
         void Render();
@@ -113,7 +114,7 @@ JUEGO::~JUEGO(){
  */
 
 void JUEGO::iniciar(){
-    system("cls");
+    limpiarPantalla();
     OcultarCursor();
     pintarLimites();
     N.pintar();
@@ -132,6 +133,13 @@ void JUEGO::iniciar(){
     }
 }
 
+void JUEGO::limpiarPantalla(){
+    #ifdef _WIN32
+        std::system("cls");   
+    #else
+        std::system("clear"); 
+    #endif
+}
 
 /**
  * Input procesa la entrada del usuario.
