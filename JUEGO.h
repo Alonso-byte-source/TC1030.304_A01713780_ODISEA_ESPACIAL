@@ -19,7 +19,7 @@
 #include <list>
 #include<stdlib.h>
 #include <unistd.h>
-
+#include <cstdlib>
 
 // Bibilotecas de objetos a usar
 #include "ENTIDAD.h"
@@ -31,6 +31,7 @@
 
 using namespace std;
 
+//Declaración de clase JUEGO
 class JUEGO{ 
     // Declaración de variables métodos privados de instacia
     private:
@@ -67,7 +68,7 @@ class JUEGO{
  * @return
  */
 
-JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 3, 1), cont(0), puntos(0), gameOver(false){
+JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 6, 1), cont(0), puntos(0), gameOver(false){
     E.setObjetivo(&N);
     entidades.push_back(&N);
     entidades.push_back(&E);
@@ -112,18 +113,21 @@ JUEGO::~JUEGO(){
  */
 
 void JUEGO::iniciar(){
+    system("cls");
     OcultarCursor();
     pintarLimites();
     N.pintar();
 
+    // Crea 4 asteroides y los añade a la lista de asteroides
     for(int i=0; i<4; i++){
         A.push_back(new ASTEROIDE(rand()%75 +3, rand()%5 + 4));
     }
 
+    // Ciclo principal del juego
     while(!gameOver){
-        Input();
-        Update();
-        Render();
+        Input(); //Lee la entrad del teclado
+        Update(); // Actualiza el estado de los objetos
+        Render(); // Dibuja los objetos
         SleepMs(30);
     }
 }
@@ -140,10 +144,10 @@ void JUEGO::iniciar(){
  */
 
 void JUEGO::Input(){
-    if(!kbhit()) return;
+    if(!kbhit()) return; // Verifica si se presiono una tecla
     char tecla = getch();
     if(tecla == ' '){
-        B.push_back(new BALA(N.getX() + 2, N.getY() - 1, -1));
+        B.push_back(new BALA(N.getX() + 2, N.getY() - 1, -1)); // Crea balas de el jugador
     }
     N.setTecla(tecla);
     N.mover();
@@ -166,11 +170,11 @@ void JUEGO::Update(){
     actualizarAsteroides();
     colisiones();
 
-    // Si se consiguen 5 puntos aparece un enemigo
+    // Si se consiguen 20 puntos aparece un enemigo
     if(cont >= 20 && E.estaVivo()){
         E.mover();
         if(E.puedeDisparar()){
-            BE.push_back(new BALA(E.getX()+1, E.getY()+2, 1));
+            BE.push_back(new BALA(E.getX()+1, E.getY()+2, 1)); // Crea balas del enemigo
         }
         actualizarBalasEnemigo();
     }
@@ -191,25 +195,22 @@ void JUEGO::Update(){
  * @param
  * @return
  */
-
 void JUEGO::Render(){
-
-    gotoxy(4,2);
-    printf("Puntos %d ", puntos);
-
+    gotoxy(4,2); printf("Puntos %d ", puntos);
     for(auto e : entidades){
-
+        // Verifica si la entidad es el enemigo creado
         if(e == &E){
+            //Si se cumplen las condiciones pinta al enemigo
             if(cont >= 20 && E.estaVivo())
                 e->pintar();
         }
+        // Pinta las entidades
         else{
             e->pintar();
         }
     }
-
     N.pintarSalud();
-
+    // Pinta los asteroides
     for(auto a : A){
         ENTIDAD* e = a;
         e->pintar();
@@ -225,15 +226,15 @@ void JUEGO::Render(){
  * @param
  * @return
  */
-
 void JUEGO::actualizarAsteroides(){
     for(auto it = A.begin(); it != A.end(); ){
         (*it)->mover();
         (*it)->choque(N);
-
         if(false){ 
-            delete *it;
-            it = A.erase(it);   } else {
+            delete *it; 
+            it = A.erase(it);   
+        }
+        else {
             it++;
         }
     }
@@ -249,7 +250,6 @@ void JUEGO::actualizarAsteroides(){
  * @param
  * @return
  */
-
 void JUEGO::actualizarBalasJugador(){
 
     for(auto it = B.begin(); it != B.end(); ){
@@ -277,15 +277,11 @@ void JUEGO::actualizarBalasJugador(){
  * @param
  * @return
  */
-
 void JUEGO::actualizarBalasEnemigo(){
 
     for(auto it = BE.begin(); it != BE.end(); ){
-
         (*it)->mover();
-
         bool borrar = false;
-
         if((*it)->fuera()){
             gotoxy((*it)->getX(), (*it)->getY()); printf(" ");
             borrar = true;
@@ -294,7 +290,6 @@ void JUEGO::actualizarBalasEnemigo(){
             N.recibirDanio();
             borrar = true;
         }
-
         if(borrar){
             delete *it;
             it = BE.erase(it);
@@ -315,24 +310,18 @@ void JUEGO::actualizarBalasEnemigo(){
  * @param
  * @return
  */
-
 void JUEGO::colisiones(){
-
     for(auto itA = A.begin(); itA != A.end(); ){
-
         bool eliminado = false;
-
         for(auto itB = B.begin(); itB != B.end(); ){
             if((*itA)->getX() == (*itB)->getX() && ((*itA)->getY() == (*itB)->getY() || (*itA)->getY()+1 == (*itB)->getY())){
                 gotoxy((*itB)->getX(), (*itB)->getY()); printf(" ");
                 delete *itB;
                 itB = B.erase(itB);
-
                 A.push_back(new ASTEROIDE(rand()%75 + 3, 4));
                 gotoxy((*itA)->getX(), (*itA)->getY()); printf(" ");
                 delete *itA;
                 itA = A.erase(itA);
-
                 puntos += 5;
                 cont += 5;
                 eliminado = true;
@@ -342,19 +331,16 @@ void JUEGO::colisiones(){
                 itB++;
             }
         }
-
         if(!eliminado){
             itA++;
         }
     }
-
     if(cont >= 20 && E.estaVivo()){
         for(auto it = B.begin(); it != B.end(); ){
             if((*it)->getX() >= E.getX() && (*it)->getX() <= E.getX()+4 && (*it)->getY() >= E.getY() && (*it)->getY() <= E.getY()+1){
                 E.recibirDanio();
                 delete *it;
                 it = B.erase(it);
-
                 if(E.getVida() <= 0){
                     E.morir();
                     puntos += 5;
