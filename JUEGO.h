@@ -42,7 +42,7 @@ class JUEGO{
         ENEMIGO E; // Se crea un onjeto ENEMIGO
         list<ASTEROIDE*> A; // Lista con punteros a objetos ASTEROIDE
         list<BALA*> B; // Lista con punteros a objetos BALA (para el jugador)
-        list<BALA*> BE; // Lista con punteros a objetos ASTEROIDE (para el enemigo)
+        list<BALA*> BE; // Lista con punteros a objetos BALA (para el enemigo)
         list<ENTIDAD*> entidades; // Lista con punteros a objetos de la clase abstracta ENTIDAD
         void limpiarPantalla();
         void Input();
@@ -120,7 +120,7 @@ void JUEGO::iniciar(){
     N.pintar();
 
     // Crea 4 asteroides y los añade a la lista de asteroides
-    for(int i=0; i<4; i++){
+    for(int i=0; i<3; i++){
         A.push_back(new ASTEROIDE(rand()%75 +3, rand()%5 + 4));
     }
 
