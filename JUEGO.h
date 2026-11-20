@@ -1,10 +1,10 @@
 /**
- * Proyecto Odisea Espacial clase Juego
+ * Proyecto Odisea Espacial clase JUEGO
  * Alonso Vega Reséndiz
  * A01713780
  * 03/06/2026
- * version : 1
- * 
+ * version : 1.1
+ *
  * La clase JUEGO administra la lógica principal del videojuego.
  *
  * Coordina la interacción entre la nave del jugador, el enemigo,
@@ -16,12 +16,12 @@
 #ifndef JUEGO_H
 #define JUEGO_H
 
-#include <list>
-#include<stdlib.h>
-#include <unistd.h>
+#include <string>
 #include <cstdlib>
+#include <ctime>
 
-// Bibilotecas de objetos a usar
+// Bibliotecas de objetos a usar
+#include "LISTA.h"
 #include "ENTIDAD.h"
 #include "NAVE.h"
 #include "ENEMIGO.h"
@@ -32,59 +32,54 @@
 using namespace std;
 
 //Declaración de clase JUEGO
-class JUEGO{ 
-    // Declaración de variables métodos privados de instacia
+class JUEGO{
+    // OJO: el orden de declaración es el mismo que usa el constructor
     private:
         int cont; // Contador para controlar la aparición del enemigo
         int puntos;
+        int asteroidesDestruidos; // Estadísticas para el ranking
+        int enemigosDerrotados;
+        int duracion; // Segundos que duró la partida
+        time_t inicio;
+        int record; // Mejor puntuación del ranking (para mostrarla en pantalla)
+        string nombreRecord;
         bool gameOver;
-        NAVE N; // Se crea un objeto NAVE
-        ENEMIGO E; // Se crea un onjeto ENEMIGO
-        list<ASTEROIDE*> A; // Lista con punteros a objetos ASTEROIDE
-        list<BALA*> B; // Lista con punteros a objetos BALA (para el jugador)
-        list<BALA*> BE; // Lista con punteros a objetos BALA (para el enemigo)
-        list<ENTIDAD*> entidades; // Lista con punteros a objetos de la clase abstracta ENTIDAD
-        void limpiarPantalla();
+        NAVE N;
+        ENEMIGO E;
+        LISTA<ASTEROIDE*> A; // Asteroides
+        LISTA<BALA*> B;      // Balas del jugador
+        LISTA<BALA*> BE;     // Balas del enemigo
+        LISTA<ENTIDAD*> entidades; // Punteros a la clase abstracta ENTIDAD
         void Input();
         void Update();
         void Render();
         void actualizarBalasJugador();
-        void actualizarBalasEnemigo(); 
+        void actualizarBalasEnemigo();
         void actualizarAsteroides();
         void colisiones();
-    // Declaración de constructor y destructor por default, así como métodos públicos
     public:
         JUEGO();
         ~JUEGO();
         void iniciar();
+        int getPuntos() const;
+        int getAsteroides() const;
+        int getEnemigos() const;
+        int getDuracion() const;
+        void setRecord(const string&, int);
 };
 
 /**
- * JUEGO crea una nueva instancia del juego.
- *
- * Inicializa la nave del jugador, el enemigo, un contador, la puntuación y el estado
- * de la partida. También establece la nave como objetivo del enemigo.
- *
- * @param
- * @return
+ * JUEGO inicializa la nave, el enemigo, el contador, la puntuación y el
+ * estado de la partida. También establece la nave como objetivo del enemigo.
  */
-
-JUEGO::JUEGO() : N(37,20,3,3), E(37, 4, 6, 1), cont(0), puntos(0), gameOver(false){
+JUEGO::JUEGO() : cont(0), puntos(0), asteroidesDestruidos(0), enemigosDerrotados(0),
+                 duracion(0), inicio(0), record(0), nombreRecord(""), gameOver(false), N(37,20,3,3), E(37, 4, 6, true){
     E.setObjetivo(&N);
-    entidades.push_back(&N);
-    entidades.push_back(&E);
+    entidades.agregar(&N);
+    entidades.agregar(&E);
 }
 
-/**
- * ~JUEGO libera la memoria dinámica utilizada.
- *
- * Recorre las listas de asteroides y balas eliminando los objetos
- * almacenados dinámicamente para evitar fugas de memoria.
- *
- * @param
- * @return
- */
-
+/** ~JUEGO libera la memoria dinámica de asteroides y balas. */
 JUEGO::~JUEGO(){
     for(auto a : A){
         delete a;
@@ -95,179 +90,129 @@ JUEGO::~JUEGO(){
     for(auto be : BE){
         delete be;
     }
-    A.clear();
-    B.clear();
-    BE.clear();
+    A.limpiar();
+    B.limpiar();
+    BE.limpiar();
 }
 
-
-
 /**
- * iniciar ejecuta el ciclo principal del juego.
- *
- * Configura la consola, dibuja los límites, genera los asteroides
- * iniciales y mantiene el ciclo principal mientras la partida
- * continúe activa.
- *
- * @param
- * @return
+ * iniciar configura la consola, dibuja los límites, genera los asteroides
+ * iniciales y mantiene el ciclo principal mientras la partida continúe.
  */
-
 void JUEGO::iniciar(){
+    srand(time(nullptr)); // Sin esto los "aleatorios" son los mismos en cada partida
+    inicio = time(nullptr);
     limpiarPantalla();
     OcultarCursor();
     pintarLimites();
     N.pintar();
 
-    // Crea 4 asteroides y los añade a la lista de asteroides
+    // Crea 3 asteroides y los añade a la lista de asteroides
     for(int i=0; i<3; i++){
-        A.push_back(new ASTEROIDE(rand()%75 +3, rand()%5 + 4));
+        A.agregar(new ASTEROIDE(rand()%75 + 3, rand()%5 + 4));
     }
 
     // Ciclo principal del juego
     while(!gameOver){
-        Input(); //Lee la entrad del teclado
+        Input();  // Lee la entrada del teclado
         Update(); // Actualiza el estado de los objetos
         Render(); // Dibuja los objetos
         SleepMs(30);
     }
+    duracion = (int)difftime(time(nullptr), inicio);
 }
 
-void JUEGO::limpiarPantalla(){
-    #ifdef _WIN32
-        std::system("cls");   
-    #else
-        std::system("clear"); 
-    #endif
-}
+/** Getters con las estadísticas de la partida (para crear el REGISTRO). */
+int JUEGO::getPuntos() const { return puntos; }
+int JUEGO::getAsteroides() const { return asteroidesDestruidos; }
+int JUEGO::getEnemigos() const { return enemigosDerrotados; }
+int JUEGO::getDuracion() const { return duracion; }
 
 /**
- * Input procesa la entrada del usuario.
- *
- * Detecta las teclas presionadas por el jugador, actualiza el
- * movimiento de la nave y genera balas cuando se realiza un disparo.
- *
- * @param
- * @return
+ * setRecord recibe el mejor puntaje del ranking (el primero de la lista
+ * ordenada) para mostrarlo durante la partida.
  */
+void JUEGO::setRecord(const string& nombre, int puntosRecord){
+    nombreRecord = nombre;
+    record = puntosRecord;
+}
 
+/** Input detecta las teclas, mueve la nave y genera balas al disparar. */
 void JUEGO::Input(){
-    if(!kbhit()) return; // Verifica si se presiono una tecla
+    if(!kbhit()) return;
     char tecla = getch();
     if(tecla == ' '){
-        B.push_back(new BALA(N.getX() + 2, N.getY() - 1, -1)); // Crea balas de el jugador
+        B.agregar(new BALA(N.getX() + 2, N.getY() - 1, -1)); // Bala del jugador
     }
     N.setTecla(tecla);
     N.mover();
 }
 
 /**
- * Update actualiza el estado del juego.
- *
- * Coordina la actualización de balas, asteroides, colisiones,
- * comportamiento del enemigo y verifica si el jugador ha perdido
- * todas sus vidas.
- *
- * @param
- * @return
+ * Update actualiza balas, asteroides, colisiones y comportamiento del
+ * enemigo, y verifica si el jugador perdió todas sus vidas.
  */
-
 void JUEGO::Update(){
+    // El enemigo aparece cuando cont llega a 20. Se procesa primero para que
+    // su bala nueva se mueva una sola vez por frame, como las demás.
+    if(cont >= 20 && E.estaVivo()){
+        E.mover();
+        if(E.puedeDisparar()){
+            BE.agregar(new BALA(E.getX() + 2, E.getY() + ENEMIGO::ALTO, 1)); // Bala del enemigo
+        }
+    }
+
     actualizarBalasJugador();
     actualizarBalasEnemigo();
     actualizarAsteroides();
     colisiones();
 
-    // Si se consiguen 20 puntos aparece un enemigo
-    if(cont >= 20 && E.estaVivo()){
-        E.mover();
-        if(E.puedeDisparar()){
-            BE.push_back(new BALA(E.getX()+1, E.getY()+2, 1)); // Crea balas del enemigo
-        }
-        actualizarBalasEnemigo();
-    }
-
-    N.morir();
+    N.verificarMuerte();
     if(N.getVida() <= 0){
         gameOver = true;
     }
 }
 
-/**
- * Render dibuja los elementos visibles del juego.
- *
- * Actualiza la información mostrada en pantalla, incluyendo
- * la puntuación, la nave, la barra de salud, el enemigo y
- * los asteroides presentes en la partida.
- *
- * @param
- * @return
- */
+/** Render dibuja la puntuación, la nave, la salud, el enemigo y los asteroides. */
 void JUEGO::Render(){
+    // Línea de récord: avisa cuando el jugador supera al primer lugar del ranking
+    char linea[64];
+    if(puntos > record)  snprintf(linea, sizeof(linea), "** NUEVO RECORD! **");
+    else                 snprintf(linea, sizeof(linea), "Record: %s (%d)", nombreRecord.c_str(), record);
+    gotoxy(4,1); printf("%-40s", linea);
     gotoxy(4,2); printf("Puntos %d ", puntos);
     for(auto e : entidades){
-        // Verifica si la entidad es el enemigo creado
         if(e == &E){
-            //Si se cumplen las condiciones pinta al enemigo
             if(cont >= 20 && E.estaVivo())
                 e->pintar();
         }
-        // Pinta las entidades
         else{
             e->pintar();
         }
     }
     N.pintarSalud();
-    // Pinta los asteroides
     for(auto a : A){
-        ENTIDAD* e = a;
-        e->pintar();
+        a->pintar();
     }
 }
 
-/**
- * actualizarAsteroides actualiza los asteroides activos.
- *
- * Recorre todos los asteroides, actualiza su posición y verifica
- * posibles colisiones con la nave del jugador.
- *
- * @param
- * @return
- */
+/** actualizarAsteroides mueve los asteroides y revisa choques con la nave. */
 void JUEGO::actualizarAsteroides(){
-    for(auto it = A.begin(); it != A.end(); ){
-        (*it)->mover();
-        (*it)->choque(N);
-        if(false){ 
-            delete *it; 
-            it = A.erase(it);   
-        }
-        else {
-            it++;
-        }
+    for(auto a : A){
+        a->mover();
+        a->choque(N);
     }
 }
 
-/**
- * actualizarBalasJugador mueve las balas del jugador.
- *
- * Recorre todas las balas disparadas por la nave, actualiza
- * su posición y elimina aquellas que salen de los límites
- * del área de juego.
- *
- * @param
- * @return
- */
+/** actualizarBalasJugador mueve las balas del jugador y elimina las que salen. */
 void JUEGO::actualizarBalasJugador(){
-
     for(auto it = B.begin(); it != B.end(); ){
-
         (*it)->mover();
 
         if((*it)->fuera()){
             gotoxy((*it)->getX(), (*it)->getY()); printf(" ");
             delete *it;
-            it = B.erase(it);
+            it = B.eliminar(it);
         }
         else{
             it++;
@@ -276,17 +221,10 @@ void JUEGO::actualizarBalasJugador(){
 }
 
 /**
- * actualizarBalasEnemigo mueve las balas enemigas.
- *
- * Actualiza la posición de cada bala disparada por el enemigo,
- * detecta impactos contra la nave y elimina las balas que salen
- * de la pantalla o colisionan con el jugador.
- *
- * @param
- * @return
+ * actualizarBalasEnemigo mueve las balas enemigas, detecta impactos contra
+ * la nave y elimina las que salen de la pantalla o impactan.
  */
 void JUEGO::actualizarBalasEnemigo(){
-
     for(auto it = BE.begin(); it != BE.end(); ){
         (*it)->mover();
         bool borrar = false;
@@ -294,14 +232,15 @@ void JUEGO::actualizarBalasEnemigo(){
             gotoxy((*it)->getX(), (*it)->getY()); printf(" ");
             borrar = true;
         }
-        else if((*it)->getX() >= N.getX() && (*it)->getX() <= N.getX()+5 && (*it)->getY() >= N.getY() &&(*it)->getY() <= N.getY()+2){
+        else if((*it)->getX() >= N.getX() && (*it)->getX() < N.getX() + NAVE::ANCHO &&
+                (*it)->getY() >= N.getY() && (*it)->getY() < N.getY() + NAVE::ALTO){
             N.recibirDanio();
             borrar = true;
         }
         if(borrar){
             delete *it;
-            it = BE.erase(it);
-        } 
+            it = BE.eliminar(it);
+        }
         else{
             it++;
         }
@@ -309,14 +248,8 @@ void JUEGO::actualizarBalasEnemigo(){
 }
 
 /**
- * colisiones verifica las interacciones entre objetos.
- *
- * Detecta colisiones entre balas y asteroides, así como entre
- * balas y el enemigo. Actualiza la puntuación, elimina objetos
- * destruidos y gestiona el daño recibido por el enemigo.
- *
- * @param
- * @return
+ * colisiones detecta choques entre balas y asteroides, y entre balas y
+ * enemigo. Actualiza la puntuación y elimina los objetos destruidos.
  */
 void JUEGO::colisiones(){
     for(auto itA = A.begin(); itA != A.end(); ){
@@ -325,16 +258,17 @@ void JUEGO::colisiones(){
             if((*itA)->getX() == (*itB)->getX() && ((*itA)->getY() == (*itB)->getY() || (*itA)->getY()+1 == (*itB)->getY())){
                 gotoxy((*itB)->getX(), (*itB)->getY()); printf(" ");
                 delete *itB;
-                itB = B.erase(itB);
-                A.push_back(new ASTEROIDE(rand()%75 + 3, 4));
+                itB = B.eliminar(itB);
+                A.agregar(new ASTEROIDE(rand()%75 + 3, 4));
                 gotoxy((*itA)->getX(), (*itA)->getY()); printf(" ");
                 delete *itA;
-                itA = A.erase(itA);
+                itA = A.eliminar(itA);
                 puntos += 5;
                 cont += 5;
+                asteroidesDestruidos++;
                 eliminado = true;
                 break;
-            } 
+            }
             else{
                 itB++;
             }
@@ -345,14 +279,19 @@ void JUEGO::colisiones(){
     }
     if(cont >= 20 && E.estaVivo()){
         for(auto it = B.begin(); it != B.end(); ){
-            if((*it)->getX() >= E.getX() && (*it)->getX() <= E.getX()+4 && (*it)->getY() >= E.getY() && (*it)->getY() <= E.getY()+1){
+            if((*it)->getX() >= E.getX() && (*it)->getX() < E.getX() + ENEMIGO::ANCHO &&
+               (*it)->getY() >= E.getY() && (*it)->getY() < E.getY() + ENEMIGO::ALTO){
                 E.recibirDanio();
+                gotoxy((*it)->getX(), (*it)->getY()); printf(" ");
                 delete *it;
-                it = B.erase(it);
+                it = B.eliminar(it);
                 if(E.getVida() <= 0){
                     E.morir();
                     puntos += 5;
                     cont = 0;
+                    enemigosDerrotados++;
+                    E.reaparecer(); // Queda listo para la siguiente oleada (aparece al llegar cont a 20)
+                    break;
                 }
             }
             else{

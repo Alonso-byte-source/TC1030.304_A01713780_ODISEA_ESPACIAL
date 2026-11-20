@@ -3,32 +3,38 @@
  * Alonso Vega Reséndiz
  * A01713780
  * 03/06/2026
- * version : 1
- * 
- * La clase ENEMIGO representa un objeto que tiene el propósito de dañar al objeto
- * NAVE controlado por el usuario, desde que aparece puede acceder a las coordenadas de
- * la NAVE para atacar 
+ * version : 1.1
+ *
+ * La clase ENEMIGO representa un objeto que tiene el propósito de dañar a la
+ * NAVE controlada por el usuario; puede acceder a las coordenadas de la NAVE
+ * para atacarla.
  */
 #ifndef ENEMIGO_H
 #define ENEMIGO_H
 
+#include <cstdlib> // abs
 #include "ENTIDAD.h" // Clase madre
-#include "NAVE.h" // La clase ENEMIGo recibe la referencia de un objeto tipo NAVE
+#include "NAVE.h" // El ENEMIGO guarda un puntero a una NAVE
 #include "CONSOLE.h" // Clase auxiliar
 
 //Declaración de clase ENEMIGO que hereda de ENTIDAD
 class ENEMIGO : public ENTIDAD{
     // Declaración de variables privadas de instacia
     private:
-        int vida,cooldown;
+        int vida, vidaMax, cooldown, xIni, yIni;
         bool disparando, vivo;
-        NAVE* objetivo; // Objetivo es una variable de tipo puntero a NAVE
+        NAVE* objetivo; // Puntero a la NAVE a perseguir
     // Declaración de métodos que va a tener el objeto
     public:
+        // Dimensiones del recuadro: se usan para pintar, borrar y detectar colisiones
+        static constexpr int ANCHO = 4;
+        static constexpr int ALTO = 2;
+
         ENEMIGO(int, int, int, bool);
         void recibirDanio();
         bool puedeDisparar();
         void morir();
+        void reaparecer();
         bool estaVivo();
         int getVida();
         void setObjetivo(NAVE* n); // Función que recibe la dirección de memoria del objeto NAVE
@@ -38,38 +44,31 @@ class ENEMIGO : public ENTIDAD{
         void borrar() override;
 };
 
-/** 
-* Constructor donde recibe valores para llenar las variables de instacia
-* 
-* @param int x1: posicón en x inicial del enemigo, int y1: posición inicial en y 
-* del enemigo, int vida1: cantidad de vidas del enemigo, bool vivo1: estado del enemigo
-* @return
-*/
+/**
+ * Constructor
+ *
+ * @param x1 posición inicial en x, y1 posición inicial en y,
+ * vida1 vidas del enemigo, vivo1 estado del enemigo
+ */
 ENEMIGO::ENEMIGO(int x1, int y1, int vida1, bool vivo1)
-    : ENTIDAD(x1, y1), vida(vida1), vivo(vivo1), objetivo(nullptr), cooldown(0), disparando(false){}
-
+    : ENTIDAD(x1, y1), vida(vida1), vidaMax(vida1), cooldown(0), xIni(x1), yIni(y1), disparando(false), vivo(vivo1), objetivo(nullptr) {}
 
 /**
- * mover mueve el objeto ENEMIGO
- * 
- * Esta función utiliza la variable "objetivo" que guarda un puntero al 
- * objeto NAVE para ver las coordenas de la NAVE y poder moverse a esa posición
- * 
- * @param 
- * @return
+ * mover mueve el ENEMIGO hacia la posición en x de la NAVE. Al alinearse,
+ * entra en modo "disparando" durante 30 frames (cooldown).
  */
 void ENEMIGO::mover(){
-    if(!objetivo) return; //Verifica si la variable "objetivo" esta vacía
+    if(!objetivo) return;
     borrar();
     // Se verifica si el enemigo esta disparando
     if(disparando){
-        cooldown++;//Incrementa el contador
-        if(cooldown >= 30){ 
-            disparando = false; // Cambia el estado de disparando si el contador llega a 30
-            cooldown = 0; // Reinicia el contador
+        cooldown++; //Incrementa el contador
+        if(cooldown >= 30){
+            disparando = false; //Cambia el estado de disparando si el contador llega a 30
+            cooldown = 0; //Reinicia el contador
         }
     }
-    // Si no esta disparando el ENEMIGO se mueve a la posición en x de la NAVE
+    //Si no esta disparando el ENEMIGO se mueve a la posición en x de la NAVE
     else{
         if(x < objetivo->getX()){
             x++;
@@ -77,7 +76,7 @@ void ENEMIGO::mover(){
         else if(x > objetivo->getX()){
             x--;
         }
-        // Si la distancia a la NAVE es menor o igual a 1 el estado del enemigo cambia e inicia el contador cooldown de nuevo
+        //Si la distancia a la NAVE es menor o igual a 1 el estado del enemigo cambia e inicia el contador cooldown de nuevo
         if(abs(x - objetivo->getX()) <= 1){
             disparando = true;
         }
@@ -109,8 +108,9 @@ void ENEMIGO::pintar(){
  * @return
  */
 void ENEMIGO::borrar(){
-    gotoxy(x, y);   printf("        ");
-    gotoxy(x, y+1); printf("        ");
+    for(int i = 0; i < ALTO; i++){
+        gotoxy(x, y+i); printf("    "); // ANCHO espacios
+    }
 }
 
 /**
@@ -143,20 +143,41 @@ bool ENEMIGO::puedeDisparar(){
  */
 void ENEMIGO::morir(){
     borrar();
-    gotoxy(x, y);   printf("***");
-    gotoxy(x, y+1); printf("***");
-    Sleep(200);
+    gotoxy(x, y);   printf("****");
+    gotoxy(x, y+1); printf("****");
+    SleepMs(200);
 
     borrar();
-    gotoxy(x, y);   printf("* ** *");
-    gotoxy(x, y+1); printf("* ** *");
+    gotoxy(x, y);   printf("*  *");
+    gotoxy(x, y+1); printf("*  *");
     SleepMs(200);
 
     borrar();
     vivo = false;
 }
 
+/**
+ * reaparecer deja al ENEMIGO listo para una nueva oleada: vuelve a su
+ * posición inicial con la vida completa y vivo otra vez.
+ * 
+ * @param
+ * @return
+ */
+void ENEMIGO::reaparecer(){
+    x = xIni;
+    y = yIni;
+    vida = vidaMax;
+    cooldown = 0;
+    disparando = false;
+    vivo = true;
+}
 
+/**
+ * estaVivo regresa el estado del enemigo
+ * 
+ * @param 
+ * @return bool vivo
+ */
 bool ENEMIGO::estaVivo(){
     return vivo;
 }

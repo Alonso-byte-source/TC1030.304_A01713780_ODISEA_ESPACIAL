@@ -3,11 +3,11 @@
  * Alonso Vega Reséndiz
  * A01713780
  * 03/06/2026
- * version : 1
- * 
+ * version : 1.1
+ *
  * La clase NAVE representa el objeto que el usuario controla, esta clase
- * hereda métodos y atributos de la clase abstracta ENTIDAD e interactúa 
- * con las demás clases a traves de la clase JUEGO 
+ * hereda métodos y atributos de la clase abstracta ENTIDAD e interactúa
+ * con las demás clases a través de la clase JUEGO
  */
 
 #ifndef NAVE_H
@@ -21,13 +21,17 @@ class NAVE : public ENTIDAD{
     // Declaración de variables privadas de instacia
     private:
         int corazones, vida;
-        char boton; // Variable para guardar la tecla pulsada
+        char boton; // Tecla pulsada
     // Declaración de métodos que va a tener el objeto
-    public: 
+    public:
+        // Dimensiones del recuadro: se usan para pintar, borrar y detectar colisiones
+        static constexpr int ANCHO = 5;
+        static constexpr int ALTO = 3;
+
         NAVE(int, int, int, int);
         void recibirDanio();
         void pintarSalud();
-        void morir();
+        void verificarMuerte();
         int getVida();
         void setTecla(char);
         // Métodos sobreescritos de la clase ENTIDAD
@@ -36,13 +40,12 @@ class NAVE : public ENTIDAD{
         void borrar() override;
 };
 
-/** 
-* Constructor donde recibe valores para llenar las variables de instacia
-* 
-* @param int x1: posicón en x inicial de la nave, int y1: posición inicial en y 
-* de la nave, int corazones1: cantidad de corazones por vida, int vida1: cantidad de vidas
-* @return
-*/
+/**
+ * Constructor
+ *
+ * @param x1 posición inicial en x, y1 posición inicial en y,
+ * corazones1 corazones por vida, vida1 cantidad de vidas
+ */
 NAVE::NAVE(int x1, int y1, int corazones1, int vida1): ENTIDAD(x1, y1), corazones(corazones1), vida(vida1), boton(' ') {}
 
 /**
@@ -52,7 +55,7 @@ NAVE::NAVE(int x1, int y1, int corazones1, int vida1): ENTIDAD(x1, y1), corazone
  * @return
  */
 void NAVE::recibirDanio(){
-    corazones --;
+    if(corazones > 0) corazones--;
 }
 
 /**
@@ -81,9 +84,9 @@ void NAVE::setTecla(char tecla){
 void NAVE::mover(){
     borrar();
     if(boton == 'a' && x > 3) x--;
-    if(boton == 'd' && x+6 < 77) x++;
+    if(boton == 'd' && x + ANCHO < 77) x++;
     if(boton == 'w' && y > 4) y--;
-    if(boton == 's' && y+3 < 25) y++;
+    if(boton == 's' && y + ALTO < 25) y++;
     pintar();
 }
 
@@ -112,11 +115,12 @@ void NAVE::pintar(){
  * @return
  */
 void NAVE::borrar(){
-    gotoxy(x, y);   printf("       ");
-    gotoxy(x, y+1); printf("       ");
-    gotoxy(x, y+2); printf("       ");
+    for(int i = 0; i < ALTO; i++){
+        gotoxy(x, y+i); printf("     "); // ANCHO espacios
+    }
 }
 
+/** pintarSalud imprime las vidas y los corazones restantes. */
 void NAVE::pintarSalud(){
     gotoxy(50,2); printf("VIDAS %d", vida);
     gotoxy(64, 2); printf("SALUD");
@@ -127,26 +131,25 @@ void NAVE::pintarSalud(){
 }
 
 /**
- * morir imprime una animación de muerte
- * 
- * Esta función imprime una simulación de muerte cada que el objeto NAVE pierde
- * todos los corazones de una vida
- * @param 
+ * verificarMuerte revisa si la NAVE perdió todos sus corazones; si es así
+ * muestra una animación, resta una vida y restablece los corazones.
+ *
+ * @param
  * @return
  */
-void NAVE::morir(){
-    if(corazones == 0){
+void NAVE::verificarMuerte(){
+    if(corazones <= 0){
         borrar();
-        gotoxy(x, y);   printf("   **   ");
-        gotoxy(x, y+1); printf("  ****  ");
-        gotoxy(x, y+2); printf("   **   ");
-        Sleep(200);
+        gotoxy(x, y);   printf(" ** ");
+        gotoxy(x, y+1); printf("****");
+        gotoxy(x, y+2); printf(" ** ");
+        SleepMs(200);
 
         borrar();
-        gotoxy(x, y);   printf(" * ** * ");
-        gotoxy(x, y+1); printf("  ****  ");
-        gotoxy(x, y+2); printf(" * ** * ");
-        Sleep(200);
+        gotoxy(x, y);   printf("* ** *");
+        gotoxy(x, y+1); printf(" **** ");
+        gotoxy(x, y+2); printf("* ** *");
+        SleepMs(200);
 
         borrar();
         vida--;
@@ -165,4 +168,5 @@ void NAVE::morir(){
 int NAVE::getVida(){
     return vida;
 }
+
 #endif
