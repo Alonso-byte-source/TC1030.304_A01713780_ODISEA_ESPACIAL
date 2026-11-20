@@ -143,8 +143,8 @@ void menuRanking(RANKING& ranking){
                    " (" + to_string(vista.getComparaciones()) + " comparaciones).";
         }
         else if(op == 2){
-            int min = leerEntero("  Puntos mínimos: ");
-            if(min < 0){ info = "Valor no válido."; continue; }
+            int min = leerEntero("  Puntos minimos: ");
+            if(min < 0){ info = "Valor no valido."; continue; }
             vista = vista.filtrarPorPuntos(min);
             info = "Filtro: " + to_string(min) + " puntos o más.";
         }
@@ -154,8 +154,8 @@ void menuRanking(RANKING& ranking){
             info = "Filtro: jugadores que contienen \"" + texto + "\".";
         }
         else if(op == 4){
-            int n = leerEntero("  Cuántos (N): ");
-            if(n <= 0){ info = "Valor no válido."; continue; }
+            int n = leerEntero("  Cuantos (N): ");
+            if(n <= 0){ info = "Valor no valido."; continue; }
             vista = vista.top(n);
             info = "Primeros " + to_string(n) + " del orden actual.";
         }
@@ -164,13 +164,13 @@ void menuRanking(RANKING& ranking){
             info = "Todas las partidas, ordenadas por puntos.";
         }
         else if(op == 6){
-            int n = leerEntero("  Cuántos registros de prueba: ");
+            int n = leerEntero("  Cuantos registros de prueba: ");
             if(n <= 0 || n > 5000){ info = "Usa un valor entre 1 y 5000."; continue; }
             vista.generarPrueba(n);
             info = to_string(n) + " registros de prueba agregados (se pierden al restablecer).";
         }
         else{
-            info = "Opción no válida.";
+            info = "Opción no valida.";
         }
     }
 }
@@ -188,7 +188,7 @@ int main(){
         cout << " 1) Jugar\n";
         cout << " 2) Ver ranking\n";
         cout << " 3) Salir\n";
-        int op = leerEntero("Opción: ");
+        int op = leerEntero("Opcion: ");
         if(!cin) break;
 
         if(op == 1){
@@ -202,6 +202,6 @@ int main(){
             break;
         }
     }
-    cout << "\n¡Hasta la próxima!\n";
+    cout << "\nSee you later alligator!\n";
     return 0;
 }
