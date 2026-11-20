@@ -7,12 +7,6 @@
  * LISTA<T> es una lista doblemente enlazada genérica (plantilla) hecha a mano.
  * Cada nodo guarda un dato y apunta al nodo anterior y al siguiente.
  *
- * Por qué es natural para este juego:
- *   - Las balas, asteroides y partidas del ranking se agregan y se eliminan
- *     todo el tiempo. Eliminar un nodo es O(1) y no hay que desplazar elementos.
- *   - Se puede eliminar mientras se recorre (eliminar() regresa el siguiente).
- *   - Insertar en el lugar correcto de una lista ordenada no mueve datos.
- *
  * También implementa tres algoritmos de ordenamiento que reciben un
  * comparador "antes(a, b)" (true si a debe ir antes que b). La lista no
  * conoce el criterio: quien la usa decide cómo comparar.
